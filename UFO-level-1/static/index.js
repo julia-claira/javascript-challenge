@@ -1,128 +1,100 @@
-//THE FORMS------------------------------------------------------------------
-//label and reorder more logically
-//alphabetize
-//set button events for filter
+//The Filter Selection Form------------------------------------------------------------------
+
+//User Events
 var resetButton = d3.select("#reset");//resets filter
-resetButton.on("click",initialTable);
+resetButton.on("click",resetTable);
 
 var dateField= d3.select("#date-field");//filter for date
-dateField.on("change", filteredDateTable);
+dateField.on("change", filteredTable);
 
 var shapeField= d3.select("#shape");//filter for shape
-shapeField.on("change", filteredDateTable);
+shapeField.on("change", filteredTable);
 
-var countryField= d3.select("#country");//filter for shape
-countryField.on("change", filteredDateTable);
+var countryField= d3.select("#country");//filter for country
+countryField.on("change", filteredTable);
 
-var stateField= d3.select("#state");//filter for shape
-stateField.on("change", filteredDateTable);
+var stateField= d3.select("#state");//filter for state
+stateField.on("change", filteredTable);
 
-var cityField= d3.select("#city");//filter for shape
-cityField.on("change", filteredDateTable);
+var cityField= d3.select("#city");//filter for city
+cityField.on("change", filteredTable);
 
+
+//Function For Dynamic Dropdown Menus -- State Dropdown updates if Country changes///City Dropdown updates if State changes
 function dropDowns(theField,theData,theColumn){
 
-  //create dropdown
   theField.html("");//clears dynamic dropdown
-  var theValues=theData.map(function(item){//finds all the shapes
+  
+  
+  var theValues=theData.map(function(item){//finds all the values
     return Object.values(item)[theColumn];
   });
-  //console.log(theValues);
-  theField.append("option").text('All').attr('value','All');
-  var uniqueValues=[];
+  
+  theField.append("option").text('All').attr('value','All');//adds "All" to dropdown as default
+  
+  var uniqueValues=[];//holds all the unique values to populate the dropdown
   theValues.forEach(thevalue=>{
-    if (uniqueValues.includes(thevalue));//if shape is already found skip
-    else {//if shape is first time appearing add to dropdown menu
+    if (uniqueValues.includes(thevalue));//if value is already in array skip
+    else {//if value is first time appearing add to dropdown menu
       theField.append("option").text(thevalue).attr('value',thevalue);
       uniqueValues.push(thevalue);
     };
   });
-}
+};
  
 
-//THE TABLE SETUP------------------------------------------------------------------
+//Function to Populate Filtered Table-------------------------------------------------------------------------
 
-//use D3 to select table elements
-var table=d3.select("table");
-//use D3 to select table head
- var thead=d3.select("thead");
- //use D3 to select table body
-var tbody=d3.select("tbody");
+function filteredTable(){
+  
+  tbody.html(""); //clears table body
+  var filtered_data=data;//stores data in temporary variable
+  
 
-
-//append header column names for Table
-var columnNames=['date/time', 'city', 'state', 'country', 'shape','durationMinutes:','comments'];
-var row = thead.append("tr");
-columnNames.forEach(columnName => row.append("th").text(columnName));
-
-
-//initial data add to table
-function initialTable(){
-
-    tbody.html(""); //clears table body
-    
-    //prevents from reloading if reset button is hit
-    if (d3.event !=null){
-      d3.event.preventDefault();
-    };
-    
-    //populate table
-    data.forEach(sighting => {
-
-    var row =tbody.append("tr")
-    Object.entries(sighting).forEach(([key,value]) => {
-       row.append("td").text(value); 
-    }); 
-  }); 
-};
-
-//THE FILTERED TABLE INFORMTATON------------------------------------------------------------------
-
-//function for filtered table
-function filteredDateTable(){
-  if (d3.event){
-    var triggerValue=d3.event.target.name;
-    if (triggerValue==="") triggerValue="textField";//returns textfield if the event was text change
-    //console.log('hit')
+  if (d3.event){//if the function is triggered by a user event
+    d3.event.preventDefault();// prevent the page from refreshing  
+    var triggerValue=d3.event.target.id//stores the trigger event so dropbox options can dynamically update
   }
   else {
-    var triggerValue="";
+    var triggerValue="reset";//no trigger event if page is just loaded
   }
   
-  d3.event.preventDefault();// Prevent the page from refreshing
-  tbody.html(""); //clears table body
 
-  var filtered_data=data;
-  if (triggerValue!="textField"){
+  //depending on the trigger event, this will regenerate dropdown options for state and/or city
+  if (triggerValue!="date-field" && triggerValue!="shape" && triggerValue !="reset"){//if this is triggered by an event change in the dropdown options
       filtered_data=filtered_data.filter(selectCountry);
-    if (triggerValue==="Country" || triggerValue===""){
-      dropDowns(stateField,filtered_data,2);
+    if (triggerValue==="country"){
+      dropDowns(stateField,filtered_data,2);//regenerates state dropdown options if Country is changed
     }
     filtered_data=filtered_data.filter(selectState);
     
-    if (triggerValue==="State" || triggerValue==="Country" || triggerValue===""){ 
-      dropDowns(cityField,filtered_data,1);
+    if (triggerValue==="state" || triggerValue==="country"){ 
+      console.log('yes')
+      dropDowns(cityField,filtered_data,1);// regnerates city dropdown options if Country or State is changed.
     }
     filtered_data=filtered_data.filter(selectCity);
   }
+  //if country, state, or city is NOT the trigger event, filter table without regenerating their dropdown options
   else {
+    console.log('hit')
     filtered_data=filtered_data.filter(selectCountry);
     filtered_data=filtered_data.filter(selectState);
     filtered_data=filtered_data.filter(selectCity);
   }
-    filtered_data=filtered_data.filter(selectDate);
-    filtered_data=filtered_data.filter(selectShape);
-    
-    filtered_data.forEach(sighting => {
-        var row =tbody.append("tr");
-        Object.entries(sighting).forEach(([key,value]) => row.append("td").text(value));   
-    })
+  
+  //filters table by date and shape
+  filtered_data=filtered_data.filter(selectDate);
+  filtered_data=filtered_data.filter(selectShape);
+   
+  //Populates the table with the now filtered data based on user selection
+  filtered_data.forEach(sighting => {
+    var row =tbody.append("tr");
+    Object.entries(sighting).forEach(([key,value]) => row.append("td").text(value));   
+  })
   
 }
 
-
-
-//Custom Filter Functions
+//Custom Filter Functions-------------------------------------------------------------------
 
 //Date Filter
 function selectDate(theDate){
@@ -134,6 +106,7 @@ function selectDate(theDate){
   }
 };
 
+//Country Filter
 function selectCountry(theCountry){
   if (countryField.property("value")==="All"){
     return theCountry.country;
@@ -143,6 +116,7 @@ function selectCountry(theCountry){
   }
 };
 
+//State Filter
 function selectState(theState){
   if (stateField.property("value")==="All"){
     return theState.state;
@@ -150,6 +124,7 @@ function selectState(theState){
   return theState.state === stateField.property("value");
 };
 
+//City Filter
 function selectCity(theCity){
   if (cityField.property("value")==="All"){
     return theCity.city;
@@ -157,6 +132,7 @@ function selectCity(theCity){
   return theCity.city === cityField.property("value");
 };
 
+//Shape Filter
 function selectShape(theShape){
   if (shapeField.property("value")===""){
     return theShape.shape;
@@ -164,10 +140,34 @@ function selectShape(theShape){
   return theShape.shape === shapeField.property("value");
 };
 
-//MAIN-------------------------------------------------------------------------
+//Function to Reset Table----------------------------------------------------------
+function resetTable(){
 
-//initialize table on load
-initialTable();
-dropDowns(countryField,data,3);
-dropDowns(stateField,data,2);
-dropDowns(cityField,data,1);
+  dateField.property("value","")
+  shapeField.property("value","")
+  dropDowns(countryField,data,3);
+  dropDowns(stateField,data,2);
+  dropDowns(cityField,data,1);
+
+  filteredTable();
+}
+
+//MAIN-----------------------------------------------------------------------------------------
+
+
+//use D3 to select table elements
+var table=d3.select("table");
+//use D3 to select table head
+ var thead=d3.select("thead");
+ //use D3 to select table body
+var tbody=d3.select("tbody");
+
+
+//Append header column names for Table
+var columnNames=['date/time', 'city', 'state', 'country', 'shape','durationMinutes:','comments'];
+var row = thead.append("tr");
+columnNames.forEach(columnName => row.append("th").text(columnName));
+
+
+//populate table on load
+resetTable();
