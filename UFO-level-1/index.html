@@ -36,7 +36,20 @@
                   <ul class="list-group" id="filters">
                     <li class="filter list-group-item">
                       <label for="date">Enter a Date</label>
-                      <input class="form-control" id="datetime" type="text" placeholder="1/11/2011">
+                      <!--<input class="form-control" id="datetime" type="text" placeholder="1/11/2011">-->
+                      <input class="form-control" id="date-field" type="text" placeholder="1/11/2011">
+                    <li class="filter list-group-item">
+                      <label for="date">Shape</label>
+                      <input class="form-control" id="shape" type="text">
+                    <li class="filter list-group-item">
+                      <label for="date">Country</label>
+                      <select name="Country" id="country"></select>
+                    <li class="filter list-group-item">
+                      <label for="date">State</label>
+                      <select name="State" id="state"></select>
+                    <li class="filter list-group-item">
+                      <label for="date">City</label>
+                      <select name="City" id="city"></select>
                     </li>
                   </ul>
                 </div>
@@ -61,7 +74,7 @@
   </footer>
 </div>
 <script src="https://d3js.org/d3.v5.min.js"></script>
-<script src="static/js/data.js"></script>
+<script src="static/data.js"></script>
 <script src="static/index.js"></script>
 
 

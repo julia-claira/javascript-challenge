@@ -20,7 +20,7 @@ var cityField= d3.select("#city");//filter for city
 cityField.on("change", filteredTable);
 
 
-//Function For Dynamic Dropdown Menus -- State Dropdown updates if Country changes///City Dropdown updates if State changes
+//Function For Dynamic Dropdown Menus -- State Dropdown options update if Country changes///City Dropdown options update if State changes
 function dropDowns(theField,theData,theColumn){
 
   theField.html("");//clears dynamic dropdown
@@ -35,10 +35,14 @@ function dropDowns(theField,theData,theColumn){
   var uniqueValues=[];//holds all the unique values to populate the dropdown
   theValues.forEach(thevalue=>{
     if (uniqueValues.includes(thevalue));//if value is already in array skip
-    else {//if value is first time appearing add to dropdown menu
-      theField.append("option").text(thevalue).attr('value',thevalue);
+    else {//if value is first time appearing add to dropdown array
       uniqueValues.push(thevalue);
     };
+  });
+  //alphabetizes array and appends the dropdown
+  uniqueValues.sort();
+  uniqueValues.forEach((item) => {
+    theField.append("option").text(item).attr('value',item);
   });
 };
  
@@ -76,7 +80,7 @@ function filteredTable(){
   }
   //if country, state, or city is NOT the trigger event, filter table without regenerating their dropdown options
   else {
-    console.log('hit')
+    
     filtered_data=filtered_data.filter(selectCountry);
     filtered_data=filtered_data.filter(selectState);
     filtered_data=filtered_data.filter(selectCity);
@@ -156,15 +160,15 @@ function resetTable(){
 
 
 //use D3 to select table elements
-var table=d3.select("table");
+var table=d3.select("#ufo-table");
 //use D3 to select table head
- var thead=d3.select("thead");
+var thead=d3.select("thead");
  //use D3 to select table body
 var tbody=d3.select("tbody");
 
 
 //Append header column names for Table
-var columnNames=['date/time', 'city', 'state', 'country', 'shape','durationMinutes:','comments'];
+var columnNames=['Date/Time', 'City', 'State', 'Country', 'Shape','Duration-Minutes:','Comments'];
 var row = thead.append("tr");
 columnNames.forEach(columnName => row.append("th").text(columnName));
 
